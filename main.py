@@ -42,22 +42,23 @@ all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_
 
 TrainImgLoader = torch.utils.data.DataLoader(
          DA.myImageFloder(all_left_img,all_right_img,all_left_disp, True), 
-         batch_size= 12, shuffle= True, num_workers= 8, drop_last=False)
+         batch_size=3, shuffle=True, num_workers=2, drop_last=False)
 
 TestImgLoader = torch.utils.data.DataLoader(
          DA.myImageFloder(test_left_img,test_right_img,test_left_disp, False), 
-         batch_size= 8, shuffle= False, num_workers= 4, drop_last=False)
+         batch_size=3, shuffle=False, num_workers=2, drop_last=False)
 
 
 if args.model == 'stackhourglass':
     model = stackhourglass(args.maxdisp)
 elif args.model == 'basic':
     model = basic(args.maxdisp)
+    
 else:
     print('no model')
 
 if args.cuda:
-    model = nn.DataParallel(model)
+    # model = nn.DataParallel(model)
     model.cuda()
 
 if args.loadmodel is not None:
@@ -68,7 +69,7 @@ if args.loadmodel is not None:
 print('Number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
 
 optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999))
-
+os.makedirs(args.savemodel, exist_ok=True)
 
 def train(imgL,imgR, disp_L):
     model.train()
